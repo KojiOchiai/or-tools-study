@@ -18,16 +18,19 @@ class Task:
     interval1: cp_model.IntervalVar | None = None
     interval2: cp_model.IntervalVar | None = None
 
+    def sum_time(self) -> int:
+        return self.duration1 + self.wait + self.duration2
+
 
 # 各タスク
 tasks = [
     Task("A", 3, 2, 2),
     Task("B", 2, 5, 4),
-    Task("C", 1, 3, 1),
+    Task("C", 7, 4, 1),
 ]
 
 
-max_time = 100
+max_time = sum(task.sum_time() for task in tasks)
 for task in tasks:
     # タスクの開始時刻、終了時刻
     start1 = model.NewIntVar(0, max_time, f"start1_{task.name}")
@@ -57,7 +60,7 @@ intervals = [interval for interval in intervals_ if interval is not None]
 model.AddNoOverlap(intervals)
 
 # 目的関数: makespan 最小化
-makespan = model.NewIntVar(0, 20, "makespan")
+makespan = model.NewIntVar(0, max_time, "makespan")
 for task in tasks:
     model.Add(task.end2 <= makespan)
 model.Minimize(makespan)
